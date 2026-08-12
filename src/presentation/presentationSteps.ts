@@ -33,13 +33,17 @@ export const presentationScenes: PresentationSceneMeta[] = [
   { id: "final", label: "Reveal", number: "08", steps: 11 }
 ];
 
+const removedPresentationPages = new Set([3, 21, 44]);
+
 export const presentationSteps: PresentationStep[] = presentationScenes.flatMap((scene) =>
   Array.from({ length: scene.steps }, (_, localStep) => ({
     ...scene,
     localStep,
     absoluteStep: 0
   }))
-).map((step, absoluteStep) => ({ ...step, absoluteStep }));
+)
+  .map((step, absoluteStep) => ({ ...step, absoluteStep }))
+  .filter((step) => !removedPresentationPages.has(step.absoluteStep + 1));
 
 export const sceneStartIndex = presentationScenes.reduce<Record<PresentationSceneId, number>>((acc, scene) => {
   acc[scene.id] = presentationSteps.findIndex((step) => step.id === scene.id);

@@ -6,7 +6,7 @@ export function ReadScene({ step, reducedMotion }: { step: number; reducedMotion
   return (
     <div className="p-scene p-demo">
       <div className="p-visual">
-        {step === 0 && <div className="p-read-qr"><QRPattern className="p-large-qr" /><span /></div>}
+        {step === 0 && <div className="p-read-qr"><QRPattern className="p-large-qr" /></div>}
         {step > 0 && (
           <motion.div className="p-module-zoom" animate={{ scale: step === 1 && !reducedMotion ? 1.12 : 1 }}>
             {Array.from({ length: 36 }, (_, index) => (

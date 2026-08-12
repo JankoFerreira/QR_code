@@ -13,6 +13,8 @@ import { DestinationScene } from "./scenes/DestinationScene";
 import { SecurityScene } from "./scenes/SecurityScene";
 import { FinalScene } from "./scenes/FinalScene";
 
+const autoAdvancePages = new Set([4, 5, 16, 17, 18, 19, 46, 47, 48, 49, 50, 51, 52, 53]);
+
 type PresentationModeProps = {
   debug: boolean;
   reducedMotion: boolean;
@@ -50,14 +52,16 @@ function PresentationView({
   const step = presentationSteps[currentIndex];
   const total = presentationSteps.length;
   const progress = ((currentIndex + 1) / total) * 100;
+  const sceneSteps = presentationSteps.filter((item) => item.id === step.id);
+  const sceneVisibleIndex = sceneSteps.findIndex((item) => item.absoluteStep === step.absoluteStep) + 1;
   const sceneProps = { step: step.localStep, reducedMotion };
-  const shouldAutoAdvance = step.id === "intro" && step.localStep >= 3;
+  const shouldAutoAdvance = autoAdvancePages.has(step.absoluteStep + 1);
 
   useEffect(() => {
     if (!shouldAutoAdvance) return;
-    const timer = window.setTimeout(next, reducedMotion ? 250 : 1150);
+    const timer = window.setTimeout(next, reducedMotion ? 220 : 1050);
     return () => window.clearTimeout(timer);
-  }, [next, reducedMotion, shouldAutoAdvance]);
+  }, [next, reducedMotion, shouldAutoAdvance, step.absoluteStep]);
 
   return (
     <main className={`presentation-stage ${cursorVisible ? "" : "is-cursor-hidden"}`}>
@@ -101,7 +105,7 @@ function PresentationView({
               <div className="presentation-progress-panel">
                 <div className="presentation-progress-meta">
                   <strong>{currentIndex + 1} / {total}</strong>
-                  <span>{step.localStep + 1} / {step.steps}</span>
+                  <span>{sceneVisibleIndex} / {sceneSteps.length}</span>
                 </div>
                 <div className="presentation-progress-track"><i style={{ width: `${progress}%` }} /></div>
                 <div className="presentation-scenes">
@@ -127,7 +131,8 @@ function PresentationView({
               <div className="presentation-debug">
                 <span>scene: {step.id}</span>
                 <span>local step: {step.localStep}</span>
-                <span>absolute: {currentIndex + 1}</span>
+                <span>page: {step.absoluteStep + 1}</span>
+                <span>visible: {currentIndex + 1}</span>
                 <span>total: {presentationSteps.length}</span>
               </div>
             )}
