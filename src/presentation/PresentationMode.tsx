@@ -31,12 +31,12 @@ export function PresentationMode({ debug, reducedMotion }: PresentationModeProps
             <button className="presentation-hit-zone presentation-hit-zone-right" type="button" onClick={next} aria-label="Next step" />
             <AnimatePresence mode="wait">
               <motion.div
-                key={`${step.id}-${step.localStep}`}
+                key={step.id}
                 className="presentation-scene-shell"
-                initial={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.985 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 1.015 }}
-                transition={{ duration: reducedMotion ? 0.12 : 0.45, ease: "easeOut" }}
+                initial={reducedMotion ? { opacity: 0 } : { opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={reducedMotion ? { opacity: 0 } : { opacity: 0, y: -12 }}
+                transition={{ duration: reducedMotion ? 0.12 : 0.32, ease: "easeOut" }}
               >
                 {step.id === "intro" && <IntroScene {...sceneProps} />}
                 {step.id === "find" && <FindScene {...sceneProps} />}

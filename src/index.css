@@ -1303,6 +1303,68 @@ p {
   min-width: 0;
 }
 
+.p-find-visual {
+  isolation: isolate;
+}
+
+.p-found-label {
+  position: absolute;
+  left: 50%;
+  bottom: -34px;
+  z-index: 6;
+  transform: translateX(-50%);
+  color: var(--accent);
+  font-size: clamp(0.9rem, 1.2vw, 1.35rem);
+  font-weight: 950;
+  letter-spacing: 0.16em;
+  text-shadow: var(--accent-glow);
+  animation: pSoftIn 260ms ease both;
+}
+
+.p-finder-guides {
+  position: absolute;
+  z-index: 5;
+  width: min(44vw, 54vh);
+  aspect-ratio: 1;
+  pointer-events: none;
+}
+
+.p-finder-guides span {
+  position: absolute;
+  width: 24.2%;
+  aspect-ratio: 1;
+  border: 3px solid var(--accent);
+  box-shadow: var(--accent-glow), inset 0 0 20px rgba(0, 245, 255, 0.1);
+  animation: pFinderLock 420ms ease both;
+}
+
+.p-finder-guides span:nth-child(1) {
+  left: 3.45%;
+  top: 3.45%;
+}
+
+.p-finder-guides span:nth-child(2) {
+  right: 3.45%;
+  top: 3.45%;
+  animation-delay: 90ms;
+}
+
+.p-finder-guides span:nth-child(3) {
+  left: 3.45%;
+  bottom: 3.45%;
+  animation-delay: 180ms;
+}
+
+@keyframes pSoftIn {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes pFinderLock {
+  from { opacity: 0; transform: scale(1.18); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 .p-copy {
   position: relative;
   z-index: 4;
