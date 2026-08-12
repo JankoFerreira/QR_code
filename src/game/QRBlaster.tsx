@@ -25,6 +25,8 @@ type Runtime = {
   warning: string;
   warningUntil: number;
   shakeUntil: number;
+  bombs: number;
+  slowMoUntil: number;
   running: boolean;
   paused: boolean;
   over: boolean;
@@ -41,7 +43,9 @@ const initialSnapshot: GameSnapshot = {
   hits: 0,
   destroyed: 0,
   warning: "",
-  phase: "playing"
+  phase: "playing",
+  bombs: gameConfig.startingBombs,
+  slowMoUntil: 0
 };
 
 function createRuntime(): Runtime {
@@ -63,6 +67,8 @@ function createRuntime(): Runtime {
     warning: "",
     warningUntil: 0,
     shakeUntil: 0,
+    bombs: gameConfig.startingBombs,
+    slowMoUntil: 0,
     running: false,
     paused: false,
     over: false
@@ -82,6 +88,7 @@ export function QRBlaster({ onBack }: QRBlasterProps) {
   const [results, setResults] = useState<GameResults | null>(null);
 
   const accuracy = snapshot.shots ? Math.round((snapshot.hits / snapshot.shots) * 100) : 100;
+  const slowMoActive = view === "playing" && performance.now() < snapshot.slowMoUntil;
 
   const resetGame = useCallback(() => {
     runtimeRef.current = createRuntime();
@@ -220,6 +227,37 @@ export function QRBlaster({ onBack }: QRBlasterProps) {
     runtime.enemies = runtime.enemies.filter((enemy) => enemy.id !== target.id);
   };
 
+  const useBomb = () => {
+    const runtime = runtimeRef.current;
+    if (view !== "playing" || runtime.paused || runtime.over || runtime.bombs <= 0 || runtime.enemies.length === 0) return;
+    const cleared = runtime.enemies.filter((enemy) => enemy.kind !== "error");
+    if (!cleared.length) {
+      runtime.warning = "NO SAFE TARGETS";
+      runtime.warningUntil = performance.now() + 700;
+      return;
+    }
+    const points = cleared.reduce((total, enemy) => total + Math.round(enemy.points * gameConfig.bombScoreMultiplier), 0);
+    runtime.score += points;
+    runtime.destroyed += cleared.length;
+    runtime.bombs -= 1;
+    runtime.comboHits = 0;
+    runtime.warning = `CLEAR +${points}`;
+    runtime.warningUntil = performance.now() + 900;
+    runtime.shakeUntil = performance.now() + 180;
+    runtime.floats.push({ id: runtime.nextFloatId++, x: sizeRef.current.width / 2, y: sizeRef.current.height / 2, text: `CLEAR +${points}`, bornAt: performance.now() });
+    runtime.enemies = runtime.enemies.filter((enemy) => enemy.kind === "error");
+  };
+
+  const buySlowMo = () => {
+    const runtime = runtimeRef.current;
+    const now = performance.now();
+    if (view !== "playing" || runtime.paused || runtime.over || runtime.score < gameConfig.slowMoCost || now < runtime.slowMoUntil) return;
+    runtime.score -= gameConfig.slowMoCost;
+    runtime.slowMoUntil = now + gameConfig.slowMoDuration;
+    runtime.warning = "SLOW-MO SCAN";
+    runtime.warningUntil = now + 1000;
+  };
+
   useEffect(() => {
     const loop = (now: number) => {
       const canvas = canvasRef.current;
@@ -248,7 +286,9 @@ export function QRBlaster({ onBack }: QRBlasterProps) {
             hits: runtime.hits,
             destroyed: runtime.destroyed,
             warning: now < runtime.warningUntil ? runtime.warning : "",
-            phase: runtime.paused ? "paused" : runtime.over ? "over" : "playing"
+            phase: runtime.paused ? "paused" : runtime.over ? "over" : "playing",
+            bombs: runtime.bombs,
+            slowMoUntil: runtime.slowMoUntil
           });
         }
       } else {
@@ -298,6 +338,22 @@ export function QRBlaster({ onBack }: QRBlasterProps) {
             <strong>{Math.ceil(Math.max(0, snapshot.integrity))}%</strong>
           </div>
           <div className={`qr-blaster-warning ${snapshot.warning ? "is-active" : ""}`}>{snapshot.warning}</div>
+          <div className="qr-blaster-powerups">
+            <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={useBomb} disabled={snapshot.bombs <= 0}>
+              <span>CLEAR</span>
+              <strong>{snapshot.bombs}</strong>
+            </button>
+            <button
+              type="button"
+              className={slowMoActive ? "is-active" : ""}
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={buySlowMo}
+              disabled={snapshot.score < gameConfig.slowMoCost || slowMoActive}
+            >
+              <span>SLOW</span>
+              <strong>{slowMoActive ? `${Math.ceil((snapshot.slowMoUntil - performance.now()) / 1000)}s` : "12K"}</strong>
+            </button>
+          </div>
           {view === "countdown" && <div className="qr-blaster-countdown">{countdown}</div>}
           {snapshot.phase === "paused" && (
             <button type="button" className="qr-blaster-pause" onClick={resume}>
@@ -344,6 +400,7 @@ function formatTime(totalSeconds: number, tenths = false) {
 }
 
 function updateRuntime(runtime: Runtime, size: { width: number; height: number }, now: number, dt: number) {
+  const timeScale = now < runtime.slowMoUntil ? gameConfig.slowMoFactor : 1;
   const spawnEvery = Math.max(gameConfig.spawnRateMin, gameConfig.spawnRateStart - runtime.elapsed * 18);
   if (now - runtime.lastSpawn > spawnEvery) {
     runtime.lastSpawn = now;
@@ -356,11 +413,11 @@ function updateRuntime(runtime: Runtime, size: { width: number; height: number }
   runtime.enemies.forEach((enemy) => {
     if (enemy.kind === "glitch") {
       const wobble = Math.sin(now / 110 + enemy.jitterSeed) * 0.8;
-      enemy.x += (enemy.vx - enemy.vy * wobble) * dt;
-      enemy.y += (enemy.vy + enemy.vx * wobble) * dt;
+      enemy.x += (enemy.vx - enemy.vy * wobble) * dt * timeScale;
+      enemy.y += (enemy.vy + enemy.vx * wobble) * dt * timeScale;
     } else {
-      enemy.x += enemy.vx * dt;
-      enemy.y += enemy.vy * dt;
+      enemy.x += enemy.vx * dt * timeScale;
+      enemy.y += enemy.vy * dt * timeScale;
     }
   });
 
@@ -454,9 +511,24 @@ function draw(ctx: CanvasRenderingContext2D, runtime: Runtime, size: { width: nu
   ctx.translate(shake, 0);
   drawGrid(ctx, size);
   drawQRBase(ctx, size, runtime.integrity, now);
+  if (now < runtime.slowMoUntil) drawSlowMoField(ctx, size, now);
   runtime.enemies.forEach((enemy) => drawEnemy(ctx, enemy, now));
   runtime.floats.forEach((floating) => drawFloating(ctx, floating, now));
   ctx.restore();
+}
+
+function drawSlowMoField(ctx: CanvasRenderingContext2D, size: { width: number; height: number }, now: number) {
+  const center = qrCenter(size);
+  const radius = 90 + Math.sin(now / 180) * 16;
+  ctx.strokeStyle = "rgba(0,245,255,0.28)";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(center.x, center.y, radius, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = "rgba(0,245,255,0.14)";
+  ctx.beginPath();
+  ctx.arc(center.x, center.y, radius + 46, 0, Math.PI * 2);
+  ctx.stroke();
 }
 
 function drawGrid(ctx: CanvasRenderingContext2D, size: { width: number; height: number }) {

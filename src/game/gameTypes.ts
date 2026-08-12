@@ -37,6 +37,8 @@ export type GameSnapshot = {
   destroyed: number;
   warning: string;
   phase: "playing" | "paused" | "over";
+  bombs: number;
+  slowMoUntil: number;
 };
 
 export type GameResults = {

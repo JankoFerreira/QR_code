@@ -6,6 +6,11 @@ export const gameConfig = {
   spawnRateStart: 1250,
   spawnRateMin: 330,
   speedIncreasePerSecond: 0.012,
+  startingBombs: 3,
+  bombScoreMultiplier: 0.35,
+  slowMoCost: 12000,
+  slowMoDuration: 5200,
+  slowMoFactor: 0.45,
   comboThresholds: [
     { hits: 15, multiplier: 2.5 },
     { hits: 10, multiplier: 2 },
