@@ -20,11 +20,15 @@ type PresentationModeProps = {
 export function PresentationMode({ debug, reducedMotion }: PresentationModeProps) {
   return (
     <PresentationController>
-      {({ currentIndex, cursorVisible, next, previous, requestFullscreen }) => {
+      {({ currentIndex, cursorVisible, next, previous, reset, requestFullscreen, setCurrentIndex }) => {
         const step = presentationSteps[currentIndex];
+        const total = presentationSteps.length;
+        const progress = ((currentIndex + 1) / total) * 100;
         const sceneProps = { step: step.localStep, reducedMotion };
         return (
           <main className={`presentation-stage ${cursorVisible ? "" : "is-cursor-hidden"}`}>
+            <button className="presentation-hit-zone presentation-hit-zone-left" type="button" onClick={previous} aria-label="Previous step" />
+            <button className="presentation-hit-zone presentation-hit-zone-right" type="button" onClick={next} aria-label="Next step" />
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${step.id}-${step.localStep}`}
@@ -45,37 +49,45 @@ export function PresentationMode({ debug, reducedMotion }: PresentationModeProps
                 {step.id === "final" && <FinalScene {...sceneProps} />}
               </motion.div>
             </AnimatePresence>
-            <div className="presentation-nav" aria-hidden="true">
-              <div className="presentation-nav-line">
-                {presentationScenes.map((scene) => {
-                  const first = presentationSteps.findIndex((item) => item.id === scene.id);
-                  const last = first + scene.steps - 1;
-                  const state = currentIndex < first ? "future" : currentIndex > last ? "done" : "current";
-                  return <span key={scene.id} className={state}>{scene.number}</span>;
-                })}
-              </div>
-              <div className="presentation-nav-label">
+            <div className="presentation-topbar">
+              <div>
+                <span>Presentation Mode</span>
                 <strong>{step.number} / {step.label}</strong>
-                <span>{step.localStep + 1} / {step.steps}</span>
               </div>
-              <div className="presentation-step-dots">
-                {Array.from({ length: step.steps }, (_, index) => (
-                  <i key={index} className={index <= step.localStep ? "active" : ""} />
-                ))}
+              <div className="presentation-topbar-actions">
+                <button type="button" onClick={reset}>Reset</button>
+                <button type="button" onClick={requestFullscreen}>Fullscreen</button>
               </div>
             </div>
-            {currentIndex === 0 && (
-              <div className="presentation-help" aria-hidden="true">
-                <span><b>Right</b> Next</span>
-                <span><b>Left</b> Back</span>
-                <span><b>F</b> Fullscreen</span>
-                <span><b>R</b> Reset</span>
+            <div className="presentation-toolbar" aria-label="Presentation controls">
+              <button type="button" onClick={previous} disabled={currentIndex === 0} aria-label="Previous step">
+                <span>Back</span>
+                <strong>Left</strong>
+              </button>
+              <div className="presentation-progress-panel">
+                <div className="presentation-progress-meta">
+                  <strong>{currentIndex + 1} / {total}</strong>
+                  <span>{step.localStep + 1} / {step.steps}</span>
+                </div>
+                <div className="presentation-progress-track"><i style={{ width: `${progress}%` }} /></div>
+                <div className="presentation-scenes">
+                  {presentationScenes.map((scene) => {
+                    const first = presentationSteps.findIndex((item) => item.id === scene.id);
+                    const last = first + scene.steps - 1;
+                    const state = currentIndex < first ? "future" : currentIndex > last ? "done" : "current";
+                    return (
+                      <button key={scene.id} type="button" className={state} onClick={() => setCurrentIndex(first)}>
+                        <span>{scene.number}</span>
+                        <strong>{scene.label}</strong>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            )}
-            <button className="presentation-fullscreen" type="button" onClick={requestFullscreen} aria-label="Enter fullscreen">FS</button>
-            <div className="presentation-click-controls" aria-label="Presentation controls">
-              <button type="button" onClick={previous} aria-label="Previous slide">&larr;</button>
-              <button type="button" onClick={next} aria-label="Next slide">&rarr;</button>
+              <button type="button" onClick={next} disabled={currentIndex === total - 1} aria-label="Next step">
+                <span>Next</span>
+                <strong>Right / Space</strong>
+              </button>
             </div>
             {debug && (
               <div className="presentation-debug">
