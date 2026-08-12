@@ -252,7 +252,6 @@ export function QRBlaster({ onBack }: QRBlasterProps) {
     const runtime = runtimeRef.current;
     const now = performance.now();
     if (view !== "playing" || runtime.paused || runtime.over || runtime.score < gameConfig.slowMoCost || now < runtime.slowMoUntil) return;
-    runtime.score -= gameConfig.slowMoCost;
     runtime.slowMoUntil = now + gameConfig.slowMoDuration;
     runtime.warning = "SLOW-MO SCAN";
     runtime.warningUntil = now + 1000;
