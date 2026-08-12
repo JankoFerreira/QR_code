@@ -148,6 +148,13 @@ export function QRBlaster({ onBack }: QRBlasterProps) {
   }, [updateCanvasSize]);
 
   useEffect(() => {
+    if (view === "countdown" || view === "playing") {
+      const frame = requestAnimationFrame(updateCanvasSize);
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [updateCanvasSize, view]);
+
+  useEffect(() => {
     const pause = () => {
       const runtime = runtimeRef.current;
       if (!runtime.running || runtime.over) return;
