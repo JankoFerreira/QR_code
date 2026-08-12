@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { presentationSteps } from "./presentationSteps";
 import { presentationScenes } from "./presentationSteps";
@@ -17,16 +18,49 @@ type PresentationModeProps = {
   reducedMotion: boolean;
 };
 
+type PresentationViewProps = PresentationModeProps & {
+  currentIndex: number;
+  cursorVisible: boolean;
+  next: () => void;
+  previous: () => void;
+  reset: () => void;
+  requestFullscreen: () => void;
+  setCurrentIndex: (index: number) => void;
+};
+
 export function PresentationMode({ debug, reducedMotion }: PresentationModeProps) {
   return (
     <PresentationController>
-      {({ currentIndex, cursorVisible, next, previous, reset, requestFullscreen, setCurrentIndex }) => {
-        const step = presentationSteps[currentIndex];
-        const total = presentationSteps.length;
-        const progress = ((currentIndex + 1) / total) * 100;
-        const sceneProps = { step: step.localStep, reducedMotion };
-        return (
-          <main className={`presentation-stage ${cursorVisible ? "" : "is-cursor-hidden"}`}>
+      {(state) => <PresentationView {...state} debug={debug} reducedMotion={reducedMotion} />}
+    </PresentationController>
+  );
+}
+
+function PresentationView({
+  currentIndex,
+  cursorVisible,
+  debug,
+  next,
+  previous,
+  reducedMotion,
+  requestFullscreen,
+  reset,
+  setCurrentIndex
+}: PresentationViewProps) {
+  const step = presentationSteps[currentIndex];
+  const total = presentationSteps.length;
+  const progress = ((currentIndex + 1) / total) * 100;
+  const sceneProps = { step: step.localStep, reducedMotion };
+  const shouldAutoAdvance = step.id === "intro" && step.localStep >= 3;
+
+  useEffect(() => {
+    if (!shouldAutoAdvance) return;
+    const timer = window.setTimeout(next, reducedMotion ? 250 : 1150);
+    return () => window.clearTimeout(timer);
+  }, [next, reducedMotion, shouldAutoAdvance]);
+
+  return (
+    <main className={`presentation-stage ${cursorVisible ? "" : "is-cursor-hidden"}`}>
             <button className="presentation-hit-zone presentation-hit-zone-left" type="button" onClick={previous} aria-label="Previous step" />
             <button className="presentation-hit-zone presentation-hit-zone-right" type="button" onClick={next} aria-label="Next step" />
             <AnimatePresence mode="wait">
@@ -97,9 +131,6 @@ export function PresentationMode({ debug, reducedMotion }: PresentationModeProps
                 <span>total: {presentationSteps.length}</span>
               </div>
             )}
-          </main>
-        );
-      }}
-    </PresentationController>
+    </main>
   );
 }
