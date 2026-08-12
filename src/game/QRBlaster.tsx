@@ -431,7 +431,7 @@ function qrCenter(size: { width: number; height: number }) {
 }
 
 function qrSize(size: { width: number; height: number }) {
-  return Math.min(size.width * 0.62, size.height * 0.42, 330);
+  return Math.min(size.width * 0.52, size.height * 0.34, 280);
 }
 
 function isFinderHit(x: number, y: number, size: { width: number; height: number }) {
