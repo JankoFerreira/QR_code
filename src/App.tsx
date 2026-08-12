@@ -13,20 +13,23 @@ import { ReadSection } from "./sections/ReadSection";
 import { RepairSection } from "./sections/RepairSection";
 import { SecuritySection } from "./sections/SecuritySection";
 import { PresentationMode } from "./presentation/PresentationMode";
+import { QRBlaster } from "./game/QRBlaster";
 
 function useQueryFlags() {
   return useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     return {
       debug: params.get("debug") === "true",
-      presentationMode: params.get("presentation") === "true"
+      presentationMode: params.get("presentation") === "true",
+      gameMode: params.get("game") === "true"
     };
   }, []);
 }
 
 export default function App() {
   const reducedMotion = useReducedMotion();
-  const { debug, presentationMode } = useQueryFlags();
+  const { debug, presentationMode, gameMode } = useQueryFlags();
+  const [showGame, setShowGame] = useState(gameMode && !presentationMode);
   const [activeIndex, setActiveIndex] = useState(0);
   const [progressBySection, setProgressBySection] = useState<Record<string, number>>({});
 
@@ -54,9 +57,28 @@ export default function App() {
   }, []);
 
   const scanAgain = () => window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
+  const openGame = () => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("game", "true");
+    window.history.pushState(null, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
+    setShowGame(true);
+    window.scrollTo({ top: 0, behavior: "auto" });
+  };
+  const closeGame = () => {
+    const params = new URLSearchParams(window.location.search);
+    params.delete("game");
+    const query = params.toString();
+    window.history.pushState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}#reveal`);
+    setShowGame(false);
+    window.setTimeout(() => document.getElementById("reveal")?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth" }), 0);
+  };
 
   if (presentationMode) {
     return <PresentationMode debug={debug} reducedMotion={reducedMotion} />;
+  }
+
+  if (showGame) {
+    return <QRBlaster onBack={closeGame} />;
   }
 
   return (
@@ -70,7 +92,7 @@ export default function App() {
       <ProgressWrapper id="decode" onProgress={setSectionProgress}><DecodeSection progress={progressBySection.decode ?? 0} /></ProgressWrapper>
       <ProgressWrapper id="destination" onProgress={setSectionProgress}><DestinationSection presentationMode={presentationMode} progress={progressBySection.destination ?? 0} /></ProgressWrapper>
       <SecuritySection />
-      <ProgressWrapper id="reveal" onProgress={setSectionProgress}><FinalSection progress={progressBySection.reveal ?? 0} onScanAgain={scanAgain} /></ProgressWrapper>
+      <ProgressWrapper id="reveal" onProgress={setSectionProgress}><FinalSection progress={progressBySection.reveal ?? 0} onScanAgain={scanAgain} onPlayGame={openGame} /></ProgressWrapper>
       {debug && (
         <div className="debug-panel">
           <span>section: {stages[activeIndex]}</span>

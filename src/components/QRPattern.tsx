@@ -39,17 +39,19 @@ export function QRPattern({
   const cells = Array.from({ length: size * size }, (_, index) => {
     const row = Math.floor(index / size);
     const col = index % size;
+    const repairZone = row > 10 && row < 21 && col > 12 && col < 24;
     const damaged =
       variant === "damaged" &&
       damageProgress > 0.18 &&
       ((row > 9 && row < 17 && col > 12 && col < 23) ||
         (row > 17 && row < 25 && col > 15 && (row + col) % 2 === 0));
-    const recovering = variant === "recovered" && damageProgress < 0.85 && row > 10 && row < 21 && col > 12 && col < 24;
+    const recovering = variant === "recovered" && damageProgress < 0.85 && repairZone;
+    const recovered = variant === "recovered" && repairZone && moduleOn(row, col);
     return (
       <QRModule
         key={`${row}-${col}`}
-        active={!damaged && !recovering && moduleOn(row, col)}
-        className={damaged || recovering ? "is-missing" : ""}
+        active={recovered || (!damaged && !recovering && moduleOn(row, col))}
+        className={damaged || recovering ? "is-missing" : recovered ? "is-recovered-block" : ""}
         style={{ transitionDelay: `${((row + col) % 12) * 14}ms` }}
       />
     );

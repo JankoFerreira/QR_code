@@ -8,8 +8,7 @@ export function DamageAnimation({ progress }: { progress: number }) {
   return (
     <div className="repair-visual">
       <QRPattern variant={variant} damageProgress={recover || damage} />
-      <div className="scratch scratch-one" style={{ opacity: damage > 0.25 && recover < 0.45 ? 1 : 0 }} />
-      <div className="scratch scratch-two" style={{ opacity: damage > 0.38 && recover < 0.6 ? 1 : 0 }} />
+      <div className="damage-hole" style={{ opacity: damage > 0.25 && recover < 0.45 ? 1 : 0 }} />
       <div className="repair-labels">
         <span className={progress < 0.33 ? "is-active" : ""}>ORIGINAL</span>
         <span className={progress >= 0.33 && progress < 0.67 ? "is-active" : ""}>DAMAGED</span>
