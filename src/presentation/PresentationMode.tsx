@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { presentationSteps } from "./presentationSteps";
+import { presentationScenes } from "./presentationSteps";
 import { PresentationController } from "./PresentationController";
 import { IntroScene } from "./scenes/IntroScene";
 import { FindScene } from "./scenes/FindScene";
@@ -19,7 +20,7 @@ type PresentationModeProps = {
 export function PresentationMode({ debug, reducedMotion }: PresentationModeProps) {
   return (
     <PresentationController>
-      {({ currentIndex, cursorVisible }) => {
+      {({ currentIndex, cursorVisible, next, previous, requestFullscreen }) => {
         const step = presentationSteps[currentIndex];
         const sceneProps = { step: step.localStep, reducedMotion };
         return (
@@ -44,9 +45,37 @@ export function PresentationMode({ debug, reducedMotion }: PresentationModeProps
                 {step.id === "final" && <FinalScene {...sceneProps} />}
               </motion.div>
             </AnimatePresence>
-            <div className="presentation-progress" aria-hidden="true">
-              <span>{step.number} {step.label}</span>
-              <span>{currentIndex + 1} / {presentationSteps.length}</span>
+            <div className="presentation-nav" aria-hidden="true">
+              <div className="presentation-nav-line">
+                {presentationScenes.map((scene) => {
+                  const first = presentationSteps.findIndex((item) => item.id === scene.id);
+                  const last = first + scene.steps - 1;
+                  const state = currentIndex < first ? "future" : currentIndex > last ? "done" : "current";
+                  return <span key={scene.id} className={state}>{scene.number}</span>;
+                })}
+              </div>
+              <div className="presentation-nav-label">
+                <strong>{step.number} / {step.label}</strong>
+                <span>{step.localStep + 1} / {step.steps}</span>
+              </div>
+              <div className="presentation-step-dots">
+                {Array.from({ length: step.steps }, (_, index) => (
+                  <i key={index} className={index <= step.localStep ? "active" : ""} />
+                ))}
+              </div>
+            </div>
+            {currentIndex === 0 && (
+              <div className="presentation-help" aria-hidden="true">
+                <span><b>Right</b> Next</span>
+                <span><b>Left</b> Back</span>
+                <span><b>F</b> Fullscreen</span>
+                <span><b>R</b> Reset</span>
+              </div>
+            )}
+            <button className="presentation-fullscreen" type="button" onClick={requestFullscreen} aria-label="Enter fullscreen">FS</button>
+            <div className="presentation-click-controls" aria-label="Presentation controls">
+              <button type="button" onClick={previous} aria-label="Previous slide">&larr;</button>
+              <button type="button" onClick={next} aria-label="Next slide">&rarr;</button>
             </div>
             {debug && (
               <div className="presentation-debug">

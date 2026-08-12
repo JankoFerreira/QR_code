@@ -6,11 +6,11 @@ export function ReadScene({ step, reducedMotion }: { step: number; reducedMotion
   return (
     <div className="p-scene p-demo">
       <div className="p-visual">
-        {step === 0 && <QRPattern className="p-large-qr" />}
+        {step === 0 && <div className="p-read-qr"><QRPattern className="p-large-qr" /><span /></div>}
         {step > 0 && (
           <motion.div className="p-module-zoom" animate={{ scale: step === 1 && !reducedMotion ? 1.12 : 1 }}>
             {Array.from({ length: 36 }, (_, index) => (
-              <span key={index} className={(index * 7 + index) % 5 < 2 ? "on" : ""} />
+              <span key={index} className={`${(index * 7 + index) % 5 < 2 ? "on" : ""} ${step >= 2 && index % 7 === 0 ? "trace" : ""}`} />
             ))}
           </motion.div>
         )}
@@ -19,10 +19,9 @@ export function ReadScene({ step, reducedMotion }: { step: number; reducedMotion
         <p className="p-kicker">03 / READ ME</p>
         <h2>{step < 2 ? "The pattern is interpreted." : step < 4 ? "Image becomes information." : "A destination appears."}</h2>
         <div className="p-data-ladder">
-          <span className={step >= 2 ? "active" : ""}>MODULE PATTERN</span>
-          <span className={step >= 2 ? "active" : ""}>ENCODED DATA</span>
-          <span className={step >= 3 ? "active" : ""}>STRUCTURED DATA</span>
-          <span className={step >= 3 ? "active" : ""}>CHARACTERS</span>
+          <span className={step === 2 ? "active current" : step > 2 ? "active" : ""}>MODULES</span>
+          <span className={step === 2 ? "active current" : step > 2 ? "active" : ""}>ENCODED DATA</span>
+          <span className={step === 3 ? "active current" : step > 3 ? "active" : ""}>CHARACTERS</span>
           <strong className={step >= 4 ? "active" : ""}>{presentationConfig.exampleUrl}</strong>
         </div>
         <p>{step >= 4 ? "What looks like an image becomes structured information." : "The scanner reads the arrangement of modules."}</p>

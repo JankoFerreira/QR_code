@@ -2,12 +2,13 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { presentationScenes, presentationSteps, sceneStartIndex } from "./presentationSteps";
 
 type PresentationControllerProps = {
-  children: (state: {
+    children: (state: {
     currentIndex: number;
     setCurrentIndex: (index: number) => void;
     next: () => void;
     previous: () => void;
     reset: () => void;
+    requestFullscreen: () => void;
     cursorVisible: boolean;
   }) => React.ReactNode;
 };
@@ -24,6 +25,9 @@ export function PresentationController({ children }: PresentationControllerProps
   const next = useCallback(() => setCurrentIndexState((index) => Math.min(total - 1, index + 1)), [total]);
   const previous = useCallback(() => setCurrentIndexState((index) => Math.max(0, index - 1)), []);
   const reset = useCallback(() => setCurrentIndexState(0), []);
+  const requestFullscreen = useCallback(() => {
+    void document.documentElement.requestFullscreen?.().catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -36,9 +40,7 @@ export function PresentationController({ children }: PresentationControllerProps
       if (key === "arrowleft" || key === "pageup") previous();
       if (key === "home" || key === "r") reset();
       if (key === "end") setCurrentIndex(total - 1);
-      if (key === "f") {
-        void document.documentElement.requestFullscreen?.().catch(() => undefined);
-      }
+      if (key === "f") requestFullscreen();
       if (/^[1-9]$/.test(key)) {
         const scene = presentationScenes[Number(key) - 1];
         if (scene) setCurrentIndex(sceneStartIndex[scene.id]);
@@ -46,7 +48,7 @@ export function PresentationController({ children }: PresentationControllerProps
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [next, previous, reset, setCurrentIndex, total]);
+  }, [next, previous, requestFullscreen, reset, setCurrentIndex, total]);
 
   useEffect(() => {
     let timer = window.setTimeout(() => setCursorVisible(false), 2000);
@@ -65,8 +67,8 @@ export function PresentationController({ children }: PresentationControllerProps
   }, []);
 
   const state = useMemo(
-    () => ({ currentIndex, setCurrentIndex, next, previous, reset, cursorVisible }),
-    [currentIndex, cursorVisible, next, previous, reset, setCurrentIndex]
+    () => ({ currentIndex, setCurrentIndex, next, previous, reset, requestFullscreen, cursorVisible }),
+    [currentIndex, cursorVisible, next, previous, requestFullscreen, reset, setCurrentIndex]
   );
 
   return <>{children(state)}</>;

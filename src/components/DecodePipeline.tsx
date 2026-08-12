@@ -7,7 +7,7 @@ export function DecodePipeline({ progress }: { progress: number }) {
       {steps.map((step, index) => (
         <div key={step} className={`pipeline-step ${index < active ? "is-active" : ""}`}>
           <span>{step}</span>
-          <b>{index < active ? "✓" : ""}</b>
+          <b>{index < active ? "OK" : ""}</b>
         </div>
       ))}
       <div className={`data-found ${active >= steps.length ? "is-active" : ""}`}>DATA FOUND</div>

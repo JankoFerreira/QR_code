@@ -89,7 +89,8 @@ function ProgressWrapper({ id, onProgress, children }: { id: string; onProgress:
       const element = document.getElementById(id);
       if (!element) return;
       const rect = element.getBoundingClientRect();
-      const value = Math.min(1, Math.max(0, (window.innerHeight - rect.top) / (rect.height + window.innerHeight)));
+      const travel = Math.max(1, rect.height - window.innerHeight);
+      const value = Math.min(1, Math.max(0, -rect.top / travel));
       onProgress(id, value);
     };
     const onScroll = () => {
