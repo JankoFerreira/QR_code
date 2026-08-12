@@ -5,6 +5,8 @@ export const presentationConfig = {
   experienceTitle: "Inside the Code",
   presentationUrl: PRESENTATION_URL,
   exampleUrl: "https://example.com/inside",
+  securityExampleUrlA: "https://example.com/menu",
+  securityExampleUrlB: "https://example.com/other",
   finalMessage: "Something complicated made incredibly simple."
 };
 
@@ -16,5 +18,6 @@ export const stages = [
   "Repair",
   "Decode",
   "Destination",
+  "Security",
   "Reveal"
 ] as const;

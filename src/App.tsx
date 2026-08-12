@@ -11,6 +11,8 @@ import { FindSection } from "./sections/FindSection";
 import { OrientSection } from "./sections/OrientSection";
 import { ReadSection } from "./sections/ReadSection";
 import { RepairSection } from "./sections/RepairSection";
+import { SecuritySection } from "./sections/SecuritySection";
+import { PresentationMode } from "./presentation/PresentationMode";
 
 function useQueryFlags() {
   return useMemo(() => {
@@ -53,8 +55,12 @@ export default function App() {
 
   const scanAgain = () => window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" });
 
+  if (presentationMode) {
+    return <PresentationMode debug={debug} reducedMotion={reducedMotion} />;
+  }
+
   return (
-    <main className={presentationMode ? "presentation-mode" : ""}>
+    <main>
       <ProgressIndicator activeIndex={activeIndex} />
       <EnterSection reducedMotion={reducedMotion} />
       <ProgressWrapper id="find" onProgress={setSectionProgress}><FindSection progress={progressBySection.find ?? 0} /></ProgressWrapper>
@@ -63,6 +69,7 @@ export default function App() {
       <ProgressWrapper id="repair" onProgress={setSectionProgress}><RepairSection progress={progressBySection.repair ?? 0} /></ProgressWrapper>
       <ProgressWrapper id="decode" onProgress={setSectionProgress}><DecodeSection progress={progressBySection.decode ?? 0} /></ProgressWrapper>
       <ProgressWrapper id="destination" onProgress={setSectionProgress}><DestinationSection presentationMode={presentationMode} progress={progressBySection.destination ?? 0} /></ProgressWrapper>
+      <SecuritySection />
       <ProgressWrapper id="reveal" onProgress={setSectionProgress}><FinalSection progress={progressBySection.reveal ?? 0} onScanAgain={scanAgain} /></ProgressWrapper>
       {debug && (
         <div className="debug-panel">
