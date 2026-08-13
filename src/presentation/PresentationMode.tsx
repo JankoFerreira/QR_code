@@ -13,7 +13,7 @@ import { DestinationScene } from "./scenes/DestinationScene";
 import { SecurityScene } from "./scenes/SecurityScene";
 import { FinalScene } from "./scenes/FinalScene";
 
-const autoAdvancePages = new Set([4, 5, 16, 17, 18, 19, 46, 47, 48, 49, 50, 51, 52, 53]);
+const autoAdvancePages = new Set([2, 4, 5, 16, 17, 18, 19, 46, 47, 48, 49, 50, 51, 52, 53]);
 
 type PresentationModeProps = {
   debug: boolean;
