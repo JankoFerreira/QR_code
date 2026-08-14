@@ -1,7 +1,5 @@
-import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { presentationSteps } from "./presentationSteps";
-import { presentationScenes } from "./presentationSteps";
 import { PresentationController } from "./PresentationController";
 import { IntroScene } from "./scenes/IntroScene";
 import { FindScene } from "./scenes/FindScene";
@@ -12,8 +10,6 @@ import { DecodeScene } from "./scenes/DecodeScene";
 import { DestinationScene } from "./scenes/DestinationScene";
 import { SecurityScene } from "./scenes/SecurityScene";
 import { FinalScene } from "./scenes/FinalScene";
-
-const autoAdvancePages = new Set([2, 4, 5, 16, 17, 18, 19, 46, 47, 48, 49, 50, 51, 52, 53]);
 
 type PresentationModeProps = {
   debug: boolean;
@@ -27,7 +23,6 @@ type PresentationViewProps = PresentationModeProps & {
   previous: () => void;
   reset: () => void;
   requestFullscreen: () => void;
-  setCurrentIndex: (index: number) => void;
 };
 
 export function PresentationMode({ debug, reducedMotion }: PresentationModeProps) {
@@ -46,22 +41,10 @@ function PresentationView({
   previous,
   reducedMotion,
   requestFullscreen,
-  reset,
-  setCurrentIndex
+  reset
 }: PresentationViewProps) {
   const step = presentationSteps[currentIndex];
-  const total = presentationSteps.length;
-  const progress = ((currentIndex + 1) / total) * 100;
-  const sceneSteps = presentationSteps.filter((item) => item.id === step.id);
-  const sceneVisibleIndex = sceneSteps.findIndex((item) => item.absoluteStep === step.absoluteStep) + 1;
   const sceneProps = { step: step.localStep, reducedMotion };
-  const shouldAutoAdvance = autoAdvancePages.has(step.absoluteStep + 1);
-
-  useEffect(() => {
-    if (!shouldAutoAdvance) return;
-    const timer = window.setTimeout(next, reducedMotion ? 220 : 1050);
-    return () => window.clearTimeout(timer);
-  }, [next, reducedMotion, shouldAutoAdvance, step.absoluteStep]);
 
   return (
     <main className={`presentation-stage ${cursorVisible ? "" : "is-cursor-hidden"}`}>
@@ -97,41 +80,12 @@ function PresentationView({
                 <button type="button" onClick={requestFullscreen}>Fullscreen</button>
               </div>
             </div>
-            <div className="presentation-toolbar" aria-label="Presentation controls">
-              <button type="button" onClick={previous} disabled={currentIndex === 0} aria-label="Previous step">
-                <span>Back</span>
-                <strong>Left</strong>
-              </button>
-              <div className="presentation-progress-panel">
-                <div className="presentation-progress-meta">
-                  <strong>{currentIndex + 1} / {total}</strong>
-                  <span>{sceneVisibleIndex} / {sceneSteps.length}</span>
-                </div>
-                <div className="presentation-progress-track"><i style={{ width: `${progress}%` }} /></div>
-                <div className="presentation-scenes">
-                  {presentationScenes.map((scene) => {
-                    const first = presentationSteps.findIndex((item) => item.id === scene.id);
-                    const last = first + scene.steps - 1;
-                    const state = currentIndex < first ? "future" : currentIndex > last ? "done" : "current";
-                    return (
-                      <button key={scene.id} type="button" className={state} onClick={() => setCurrentIndex(first)}>
-                        <span>{scene.number}</span>
-                        <strong>{scene.label}</strong>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-              <button type="button" onClick={next} disabled={currentIndex === total - 1} aria-label="Next step">
-                <span>Next</span>
-                <strong>Right / Space</strong>
-              </button>
-            </div>
             {debug && (
               <div className="presentation-debug">
                 <span>scene: {step.id}</span>
                 <span>local step: {step.localStep}</span>
                 <span>page: {step.absoluteStep + 1}</span>
+                <span>step id: {step.stepId}</span>
                 <span>visible: {currentIndex + 1}</span>
                 <span>total: {presentationSteps.length}</span>
               </div>

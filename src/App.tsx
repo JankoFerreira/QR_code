@@ -13,6 +13,7 @@ import { ReadSection } from "./sections/ReadSection";
 import { RepairSection } from "./sections/RepairSection";
 import { SecuritySection } from "./sections/SecuritySection";
 import { PresentationMode } from "./presentation/PresentationMode";
+import { PresenterMode } from "./presenter/PresenterMode";
 import { QRBlaster } from "./game/QRBlaster";
 
 function useQueryFlags() {
@@ -20,6 +21,7 @@ function useQueryFlags() {
     const params = new URLSearchParams(window.location.search);
     return {
       debug: params.get("debug") === "true",
+      presenterMode: params.get("presenter") === "true",
       presentationMode: params.get("presentation") === "true",
       gameMode: params.get("game") === "true"
     };
@@ -28,8 +30,8 @@ function useQueryFlags() {
 
 export default function App() {
   const reducedMotion = useReducedMotion();
-  const { debug, presentationMode, gameMode } = useQueryFlags();
-  const [showGame, setShowGame] = useState(gameMode && !presentationMode);
+  const { debug, presenterMode, presentationMode, gameMode } = useQueryFlags();
+  const [showGame, setShowGame] = useState(gameMode && !presentationMode && !presenterMode);
   const [activeIndex, setActiveIndex] = useState(0);
   const [progressBySection, setProgressBySection] = useState<Record<string, number>>({});
 
@@ -75,6 +77,10 @@ export default function App() {
 
   if (presentationMode) {
     return <PresentationMode debug={debug} reducedMotion={reducedMotion} />;
+  }
+
+  if (presenterMode) {
+    return <PresenterMode />;
   }
 
   if (showGame) {

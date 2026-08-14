@@ -1,10 +1,10 @@
-export const PRESENTATION_URL = "https://example.com/inside";
+export const PRESENTATION_URL = "https://jankoferreira.github.io/QR_code/";
 
 export const presentationConfig = {
   title: "More Than Just a Square",
   experienceTitle: "Inside the Code",
   presentationUrl: PRESENTATION_URL,
-  exampleUrl: "https://example.com/inside",
+  exampleUrl: PRESENTATION_URL,
   securityExampleUrlA: "https://example.com/menu",
   securityExampleUrlB: "https://example.com/other",
   finalMessage: "Something complicated made incredibly simple."
