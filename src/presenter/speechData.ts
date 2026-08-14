@@ -33,7 +33,7 @@ export const scriptBlocks: ScriptBlock[] = [
   { id: "title", sectionId: "opening", text: "Inside the Code", triggerStepId: "intro-title", emphasis: true },
   { id: "sps", sectionId: "opening", text: "SPS: To explain how QR codes work and demonstrate how sophisticated technology can make a complicated process remarkably simple.", cue: "Purpose statement", cueType: "note" },
   { id: "open-1", sectionId: "opening", text: "Thank you, Mr Toastmaster, Good evening Mr Director and Fellow Spokesmen...", cue: "Look up and settle", cueType: "camera" },
-  { id: "open-2", sectionId: "opening", text: "You've seen this before.", triggerStepId: "intro-qr" },
+  { id: "open-2", sectionId: "opening", text: "We've all seen this before.", triggerStepId: "intro-qr" },
   { id: "open-3", sectionId: "opening", text: "You'll find it on restaurant tables." },
   { id: "open-4", sectionId: "opening", text: "On tickets." },
   { id: "open-5", sectionId: "opening", text: "On packaging." },
