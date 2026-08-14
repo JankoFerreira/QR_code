@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="45%" r="65%">
+      <stop offset="0" stop-color="#123a3d"/>
+      <stop offset="0.55" stop-color="#071314"/>
+      <stop offset="1" stop-color="#050505"/>
+    </radialGradient>
+    <filter id="cyanGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="0" stdDeviation="2.2" flood-color="#00f5ff" flood-opacity="0.9"/>
+    </filter>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#glow)"/>
+  <path d="M12 12h15v15H12zM37 12h15v15H37zM12 37h15v15H12z" fill="none" stroke="#00f5ff" stroke-width="4" filter="url(#cyanGlow)"/>
+  <path d="M18 18h3v3h-3zM43 18h3v3h-3zM18 43h3v3h-3z" fill="#ffffff"/>
+  <path d="M34 34h6v6h-6zM45 34h7v7h-7zM34 46h5v6h-5zM43 48h3v3h-3zM50 47h3v6h-3zM29 30h5v5h-5zM47 28h4v4h-4z" fill="#00f5ff" filter="url(#cyanGlow)"/>
+  <path d="M31 12h2v10h-2zM31 26h8v3h-8zM12 31h12v2H12zM26 31h3v8h-3z" fill="#ffffff" opacity="0.9"/>
+  <path d="M8 32h48" stroke="#ffffff" stroke-opacity="0.28" stroke-width="1"/>
+  <path d="M32 8v48" stroke="#00f5ff" stroke-opacity="0.32" stroke-width="1"/>
+</svg>
